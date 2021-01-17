@@ -135,6 +135,7 @@ public class GameManager : Singleton<GameManager>
     /// </summary>
     private void MoveStage()
     {
+        m_mainCamera.GetComponent<CameraController>().SetCameraPosition(m_nowStageNum);
         Initialize();
     }
 
@@ -154,10 +155,11 @@ public class GameManager : Singleton<GameManager>
     public void GameClear()
     {
         m_nowStageNum++;
+        SaveStageData();
         //最後のステージからはステージを移動しない
         if (m_nowStageNum >= (int)StageNum.StageNum_First && m_nowStageNum < (int)StageNum.StageNum_Max)
         {
-            Invoke("MoveStage", 1.5f);
+            Invoke("MoveStage", 1.0f);
         }
     }
 

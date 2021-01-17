@@ -4,11 +4,8 @@ using UnityEngine;
 
 public class TouchController : MonoBehaviour
 {
-
     private GameObject m_selectObject = default;
     private Rigidbody m_rigidbody = default;
-    //private Vector3 m_offset;
-    private Vector3 m_screenSpace;
 
     // Start is called before the first frame update
     void Start()
@@ -19,70 +16,116 @@ public class TouchController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Vector3 targetPos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z);
+        Vector3 touchPos = Input.mousePosition;
         RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(targetPos);
+        Ray ray = Camera.main.ScreenPointToRay(touchPos);
 
-        // 最初にタッチした時
-        if (Input.GetMouseButtonDown(0))
+        if (!GameManager.Instance.GetStageFail())
         {
-            Physics.Raycast(ray, out hit);
-            if(hit.transform.gameObject.tag != "don't_touch")
+            // first touch
+            if (Input.GetMouseButtonDown(0))
             {
-                Debug.Log(hit.transform.gameObject.tag);
-                m_screenSpace = Camera.main.WorldToScreenPoint(hit.transform.position);
-                //m_offset = transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z));
+                Physics.Raycast(ray, out hit);
                 SetSelectObject(hit);
+            }
+            // if m_selectObject is not null and touch is going on
+            else if (Input.GetMouseButton(0))
+            {
                 if (m_selectObject != null)
                 {
-                    m_rigidbody = m_selectObject.GetComponent<Rigidbody>();
+                    //MoveSelectObject(touchPos);
+                    CalcVector(touchPos);
+                }
+            }
+            // if m_selectObject is not null and touch is over
+            else if (Input.GetMouseButtonUp(0))
+            {
+                if (m_selectObject != null)
+                {
+                    StopMovingSelectObject();
+                    // reset selected gameobject
+                    ResetSelectObject();
                 }
             }
         }
-        // if m_selectObject is not null and touch is going on
-        else if (m_selectObject != null && Input.GetMouseButton(0))
+    }
+
+    /// <summary>
+    /// Calculate distance touch pos
+    /// </summary>
+    /// <param name="touchPos"></param>
+    public void CalcVector(Vector3 touchPos)
+    {
+        if(m_selectObject != null)
         {
-            Debug.Log("start to move object process" + m_selectObject.transform.gameObject.tag);
-            MoveSelectObject(targetPos);
-        }
-        // if m_selectObject is not null and touch is over
-        else if (m_selectObject != null && Input.GetMouseButtonUp(0))
-        {
-            MoveSelectObject(targetPos);
-            // reset selected gameobject
-            ResetSelectObject();
+            Vector3 temprenderPos = Vector3.zero;
+
+            //レイを飛ばしてオブジェクトをすべて取得
+            Ray ray = Camera.main.ScreenPointToRay(touchPos);
+            RaycastHit[] _raycastAll = Physics.RaycastAll(ray, Mathf.Infinity);
+            //すべて探索
+            foreach (var VARIABLE in _raycastAll)
+            {
+                Vector3 pos = VARIABLE.point;
+                pos.z = VARIABLE.transform.position.z;
+                temprenderPos = pos;
+            }
+
+            if (temprenderPos.z > 8 || temprenderPos == Vector3.zero) return;
+
+            temprenderPos.y = m_selectObject.transform.position.y;
+            // if in rigidbody contranints position has been freeze, move position except freeze position 
+            if ((m_rigidbody.constraints & RigidbodyConstraints.FreezePositionX) == RigidbodyConstraints.FreezePositionX)
+            {
+                temprenderPos.x = m_selectObject.transform.position.x;
+            }
+            else if ((m_rigidbody.constraints & RigidbodyConstraints.FreezePositionZ) == RigidbodyConstraints.FreezePositionZ)
+            {
+                temprenderPos.z = m_selectObject.transform.position.z;
+            }
+            MoveSelectObject(temprenderPos);
         }
     }
 
     /// <summary>
     /// move function when Object is selected and drage touch
     /// </summary>
-    public void MoveSelectObject(Vector3 targetPos)
+    public void MoveSelectObject(Vector3 touchPos)
     {
         if(m_selectObject != null)
         {
-            Vector3 updatePos = Camera.main.ScreenToWorldPoint(targetPos);
-
-            // if in rigidbody contranints position has been freeze, move position except freeze position 
-            if ((m_rigidbody.constraints & RigidbodyConstraints.FreezePositionX) == RigidbodyConstraints.FreezePositionX)
-            {
-                updatePos.x = m_selectObject.transform.position.x;
-            }
-            else if ((m_rigidbody.constraints & RigidbodyConstraints.FreezePositionZ) == RigidbodyConstraints.FreezePositionZ)
-            {
-                updatePos.z = m_selectObject.transform.position.z;
-            }
-            updatePos.y = 0.6f;
-            m_selectObject.transform.position = updatePos;
-            Debug.Log(updatePos);
+            m_selectObject.transform.position = touchPos;
         }
     }
 
+    /// <summary>
+    /// select object
+    /// </summary>
+    /// <param name="rayhit"></param>
     public void SetSelectObject(RaycastHit rayhit)
     {
-        m_selectObject = rayhit.transform.gameObject;
+        if (rayhit.transform.gameObject.tag == "Player" || rayhit.transform.gameObject.tag == "Car")
+        {
+            m_selectObject = rayhit.transform.gameObject;
+            m_rigidbody = m_selectObject.GetComponent<Rigidbody>();
+        }
     }
 
+    /// <summary>
+    /// select object
+    /// </summary>
+    /// <param name="rayhit"></param>
+    public void StopMovingSelectObject()
+    {
+        if(m_selectObject != null)
+        {
+            m_rigidbody.velocity = Vector3.zero;
+        }
+    }
+
+    /// <summary>
+    /// reset select object
+    /// </summary>
     public void ResetSelectObject()
     {
         if (m_selectObject != null)
