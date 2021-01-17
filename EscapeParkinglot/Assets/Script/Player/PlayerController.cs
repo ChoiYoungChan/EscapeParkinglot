@@ -36,13 +36,17 @@ public class PlayerController : MonoBehaviour
     /// contact function
     /// </summary>
     /// <param name="collider"></param>
-    private void OnTriggerEnter(Collider collider)
+    private void OnCollisionEnter(Collision collider)
     {
-        if(collider.tag == "Floor")
+        if(collider.transform.tag == "Finish")
         {
-            GameManager.Instance.SetStageClear(true);
+            if (!GameManager.Instance.GetStageClear() && !GameManager.Instance.GetStageFail())
+            {
+                GameManager.Instance.SetStageClear(true);
+                GameManager.Instance.GameClear();
+            }
         }
-        if(collider.tag == "Car")
+        if(collider.transform.tag == "Car")
         {
             m_contact = true;
         }
@@ -52,9 +56,9 @@ public class PlayerController : MonoBehaviour
     /// if player is not contact with other cars
     /// </summary>
     /// <param name="collider"></param>
-    private void OnTriggerExit(Collider collider)
+    private void OnCollisionExit(Collision collider)
     {
-        if (collider.tag == "Car")
+        if (collider.transform.tag == "Car")
         {
             m_contact = false;
         }

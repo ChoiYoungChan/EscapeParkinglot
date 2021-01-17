@@ -19,9 +19,9 @@ public class CameraController: MonoBehaviour
     private void Initialize()
     {
         //ステージ毎のカメラ位置を指定して配列に入れる
-        m_cameraPosition[(int)GameManager.StageNum.StageNum_First] = new Vector3(14.87f, 28.0f, -1.82f);
-        m_cameraPosition[(int)GameManager.StageNum.StageNum_Second] = new Vector3(60.1f, 28.0f, -1.82f);
-        m_cameraPosition[(int)GameManager.StageNum.StageNum_Third] = new Vector3(109.8f, 28.0f, -1.82f);
+        m_cameraPosition[0] = new Vector3(14.0f, 60.0f, -1.82f);
+        m_cameraPosition[1] = new Vector3(60.4f, 60.0f, -1.82f);
+        m_cameraPosition[2] = new Vector3(109.8f, 60.0f, -1.82f);
     }
 
     // Start is called before the first frame update
