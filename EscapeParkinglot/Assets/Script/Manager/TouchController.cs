@@ -20,32 +20,29 @@ public class TouchController : MonoBehaviour
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(touchPos);
 
-        if (!GameManager.Instance.GetStageFail())
+        // first touch
+        if (Input.GetMouseButtonDown(0))
         {
-            // first touch
-            if (Input.GetMouseButtonDown(0))
+            Physics.Raycast(ray, out hit);
+            SetSelectObject(hit);
+        }
+        // if m_selectObject is not null and touch is going on
+        else if (Input.GetMouseButton(0))
+        {
+            if (m_selectObject != null)
             {
-                Physics.Raycast(ray, out hit);
-                SetSelectObject(hit);
+                //MoveSelectObject(touchPos);
+                CalcVector(touchPos);
             }
-            // if m_selectObject is not null and touch is going on
-            else if (Input.GetMouseButton(0))
+        }
+        // if m_selectObject is not null and touch is over
+        else if (Input.GetMouseButtonUp(0))
+        {
+            if (m_selectObject != null)
             {
-                if (m_selectObject != null)
-                {
-                    //MoveSelectObject(touchPos);
-                    CalcVector(touchPos);
-                }
-            }
-            // if m_selectObject is not null and touch is over
-            else if (Input.GetMouseButtonUp(0))
-            {
-                if (m_selectObject != null)
-                {
-                    StopMovingSelectObject();
-                    // reset selected gameobject
-                    ResetSelectObject();
-                }
+                StopMovingSelectObject();
+                // reset selected gameobject
+                ResetSelectObject();
             }
         }
     }
