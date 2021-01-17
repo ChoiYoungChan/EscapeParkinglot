@@ -5,14 +5,13 @@ using UnityEngine;
 public class GameManager : Singleton<GameManager>
 {
     [SerializeField] private GameObject m_UIManagerObject = default;
-    [SerializeField] private GameObject m_particleControllerObject = default;
     [SerializeField] private GameObject m_stage_01 = default, m_stage_02 = default, m_stage_03 = default;
     [SerializeField] private Camera m_mainCamera;
 
     private bool m_isStageClear = false;
-    private bool m_isStageFail = false;
 
     private int m_nowStageNum = 0;
+    private UIManager m_uiManager;
 
     // ステージを管理するためのEnum
     public enum StageNum
@@ -75,6 +74,7 @@ public class GameManager : Singleton<GameManager>
     /// </summary>
     private void Initialize()
     {
+        InitializeData();
         InitializeStage();
         InitializeUI();
         InitializeParticle();
@@ -83,9 +83,18 @@ public class GameManager : Singleton<GameManager>
     /// <summary>
     /// Initialize UI
     /// </summary>
+    private void InitializeData()
+    {
+        m_isStageClear = false;
+        m_uiManager = m_UIManagerObject.GetComponent<UIManager>();
+    }
+
+    /// <summary>
+    /// Initialize UI
+    /// </summary>
     private void InitializeUI()
     {
-
+        m_uiManager.Initialize();
     }
 
     /// <summary>
@@ -139,16 +148,6 @@ public class GameManager : Singleton<GameManager>
         Initialize();
     }
 
-
-    /// <summary>
-    /// Function which will call when gameover
-    /// </summary>
-    public void GameOver()
-    {
-        m_isStageClear = false;
-        m_isStageFail = true;
-    }
-
     /// <summary>
     /// Function which will call when game is clear
     /// </summary>
@@ -156,10 +155,12 @@ public class GameManager : Singleton<GameManager>
     {
         m_nowStageNum++;
         SaveStageData();
+        m_uiManager.ShowGameResult();
+
         //最後のステージからはステージを移動しない
         if (m_nowStageNum >= (int)StageNum.StageNum_First && m_nowStageNum < (int)StageNum.StageNum_Max)
         {
-            Invoke("MoveStage", 1.0f);
+            Invoke("MoveStage", 1.5f);
         }
     }
 
@@ -180,25 +181,6 @@ public class GameManager : Singleton<GameManager>
     {
         m_isStageClear = status;
         return m_isStageClear;
-    }
-
-    /// <summary>
-    /// ゲームオーバーFlag変更を取得する関数 
-    /// </summary>
-    /// <returns></returns>
-    public bool GetStageFail()
-    {
-        return m_isStageFail;
-    }
-
-    /// <summary>
-    /// ゲームオーバーFlagを取得できるようにする関数
-    /// </summary>
-    /// <returns></returns>
-    public bool SetStageFail(bool status)
-    {
-        m_isStageFail = status;
-        return m_isStageFail;
     }
 
     /// <summary>

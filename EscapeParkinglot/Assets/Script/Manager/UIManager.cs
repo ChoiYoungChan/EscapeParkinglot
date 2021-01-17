@@ -8,15 +8,8 @@ public class UIManager : MonoBehaviour
 {
     [SerializeField] private Button m_retryButton = default;
     [SerializeField] private Text m_resultText = default;
-    [SerializeField] private Text m_timeText = default;
 
-    private float m_nowTime = default;
-
-    private string[] m_message =
-   {
-        "Good!",
-        "Failed"
-    };
+    private string m_message = "Good!";
 
     private enum nowUIState
     {
@@ -44,7 +37,6 @@ public class UIManager : MonoBehaviour
     {
         m_resultText.gameObject.SetActive(false);
         m_retryButton.gameObject.SetActive(false);
-        m_nowTime = 0.0f;
     }
 
     // Update is called once per frame
@@ -52,31 +44,22 @@ public class UIManager : MonoBehaviour
     {
 
     }
-
-    /// <summary>
-    /// リトライボタンを押したら実行される関数
-    /// </summary>
-    public void DoRetryButton()
-    {
-        SceneManager.LoadScene(0);
-    }
-
     /// <summary>
     /// リトライボタンを押したら実行される関数
     /// </summary>
     public void ShowGameResult()
     {
-        string message = default;
-        if(GameManager.Instance.GetStageClear() == true)
-        {
-            message = m_message[0];
-        }
-        else
-        {
-            message = m_message[1];
-        }
+        Debug.Log("Activate ShowGameResult func");
+        m_resultText.gameObject.SetActive(true);
 
-        m_resultText.text = message;
+        m_resultText.fontSize = 100;
+        m_resultText.text = "Good";
+        m_resultText.color = Color.blue;
+
+        if (GameManager.Instance.GetNowStage() == (int)(GameManager.StageNum.StageNum_Max))
+        {
+            Invoke("ShowRetryButton", 1.0f);
+        }
     }
 
     /// <summary>
@@ -87,9 +70,11 @@ public class UIManager : MonoBehaviour
         m_retryButton.gameObject.SetActive(true);
     }
 
-
-    private void ShowTimeText()
+    /// <summary>
+    /// リトライボタンを押したら実行される関数
+    /// </summary>
+    public void DoRetryButton()
     {
-
+        SceneManager.LoadScene(0);
     }
 }

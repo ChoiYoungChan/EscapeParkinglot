@@ -40,15 +40,12 @@ public class PlayerController : MonoBehaviour
     {
         if(collider.transform.tag == "Finish")
         {
-            if (!GameManager.Instance.GetStageClear() && !GameManager.Instance.GetStageFail())
+            if (!GameManager.Instance.GetStageClear())
             {
+                Debug.Log(GameManager.Instance.GetNowStage() + "Clear");
                 GameManager.Instance.SetStageClear(true);
                 GameManager.Instance.GameClear();
             }
-        }
-        if(collider.transform.tag == "Car")
-        {
-            m_contact = true;
         }
     }
 
